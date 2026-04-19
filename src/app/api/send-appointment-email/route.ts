@@ -1,25 +1,25 @@
-import {NextResponse} from "next/server";
-import getResend from "@/lib/resend";
+import { NextResponse } from "next/server";
+import { resend } from "@/lib/resend";
 import AppointmentConfirmationEmail from "@/components/EMAIL/AppointmentConfirmationEmail";
 
-export async function POST(request:Request){
-    try{
+export async function POST(request: Request) {
+    try {
         const body = await request.json()
 
-        const {userEmail, doctorName, appointmentDate, appointmentTime, appointmentType, duration, price} = body;
+        const { userEmail, doctorName, appointmentDate, appointmentTime, appointmentType, duration, price } = body;
 
-        if(!userEmail || !doctorName || !appointmentDate || !appointmentTime){
-            return NextResponse.json({error:"Missing required fields"}, {status:400})
+        if (!userEmail || !doctorName || !appointmentDate || !appointmentTime) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
         }
 
-        const  {data,error} =await getResend().emails.send({
-            from : "CareQ <no-reply@resend.dev>",
-            to : [userEmail],
-            subject : "Appointment Confirmation - CareQ",
-            react : AppointmentConfirmationEmail({
+        const { data, error } = await resend().emails.send({
+            from: "CareQ <no-reply@resend.dev>",
+            to: [userEmail],
+            subject: "Appointment Confirmation - CareQ",
+            react: AppointmentConfirmationEmail({
                 doctorName,
                 appointmentDate,
-                appointmentTime,    
+                appointmentTime,
                 appointmentType,
                 duration,
                 price,
@@ -33,12 +33,12 @@ export async function POST(request:Request){
             );
         }
         return NextResponse.json(
-            {message : "Email sent successfully",emailId:data?.id},
-            {status:200}
+            { message: "Email sent successfully", emailId: data?.id },
+            { status: 200 }
         );
     }
-    catch(error){
-        console.error("EMAIL Sending error:",error);
-        return NextResponse.json({error:"Internal Server Error"},{status : 500});
+    catch (error) {
+        console.error("EMAIL Sending error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
