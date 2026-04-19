@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  phone     String?
+  isPro     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments  Appointment[]
+  injuryReports InjuryReport[]
+
+  @@map("Users")
+}
+
+model Doctor {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  phone          String
+  specialization String   // Updated from speciality to match request
+  experience     Int      @default(0) // New field: years of experience
+  bio            String?
+  imageUrl       String
+  gender         Gender
+  isActive       Boolean  @default(true)
+  availableSlots String[] @default([]) // New field: array of time slots (e.g., ["09:00", "10:00"])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  appointments Appointment[]
+
+  @@map("Doctors")
+}
+
+model AppointmentType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  duration    Int      // Duration in minutes
+  price       Float    // Price in INR
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appointments Appointment[]
+
+  @@map("AppointmentTypes")
+}
+
+model Appointment {
+  id             String            @id @default(cuid())
+  date           DateTime
+  time           String
+  duration       Int               @default(30)
+  status         AppointmentStatus @default(BOOKED)
+  notes          String?
+  reason         String?
+  bookedViaVoice Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  userId            String
+  doctorId          String
+  appointmentTypeId String?
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doctor          Doctor           @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointmentType AppointmentType? @relation(fields: [appointmentTypeId], references: [id])
+  injuryReport    InjuryReport?
+
+  @@index([doctorId, date, time])
+  @@index([userId, createdAt])
+  @@map("Appointments")
+}
+
+model InjuryReport {
+  id              String   @id @default(cuid())
+  imageUrl        String
+  aiAnalysis      String?
+  userDescription String?
+  severity        String?  // MILD, MODERATE, SEVERE
+  createdAt       DateTime @default(now())
+
+  userId        String
+  appointmentId String? @unique
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+
+  @@map("InjuryReports")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
