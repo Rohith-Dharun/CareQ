@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import resend from "@/lib/resend";
+import getResend from "@/lib/resend";
 import AppointmentConfirmationEmail from "@/components/EMAIL/AppointmentConfirmationEmail";
 import { format } from "date-fns";
 
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
 
         const formattedDate = format(new Date(date), "EEEE, MMMM d, yyyy");
         try {
-            await resend.emails.send({
+            await getResend().emails.send({
                 from: "CareQ <no-reply@resend.dev>",
                 to: [user.email],
                 subject: "Appointment Confirmation - CareQ",

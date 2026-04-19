@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import resend from "@/lib/resend";
+import getResend from "@/lib/resend";
 import AppointmentConfirmationEmail from "@/components/EMAIL/AppointmentConfirmationEmail";
 
 export async function POST(request:Request){
@@ -12,7 +12,7 @@ export async function POST(request:Request){
             return NextResponse.json({error:"Missing required fields"}, {status:400})
         }
 
-        const  {data,error} =await resend.emails.send({
+        const  {data,error} =await getResend().emails.send({
             from : "CareQ <no-reply@resend.dev>",
             to : [userEmail],
             subject : "Appointment Confirmation - CareQ",
