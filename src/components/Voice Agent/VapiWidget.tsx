@@ -33,7 +33,7 @@ export default function VapiWidget() {
         if (isInitialized.current) return;
         isInitialized.current = true;
 
-        const token = process.env.NEXT_PUBLIC_VAPI_TOKEN || process.env.NEXT_PUBLIC_VAPI_API_KEY;
+        const token = process.env.NEXT_PUBLIC_VAPI_API_KEY;
         const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
 
         if (!token) {
